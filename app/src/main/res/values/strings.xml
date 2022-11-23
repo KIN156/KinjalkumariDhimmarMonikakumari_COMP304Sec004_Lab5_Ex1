@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">KinjalkumariDhimmarMonikakumari_COMP304Sec004_Lab5_Ex1</string>
+    <string name="indian_cuisine">Indian</string>
+    <string name="italian_cuisine">Italian</string>
+    <string name="middle_east_cuisine">Middle East</string>
+    <string name="chinese_cuisine">Chinese</string>
+    <string name="japanese_cuisine">Japanese</string>
+    <string name="boba_cuisine">Boba</string>
+    <string name="mexican_cuisine">Mexican</string>
+    <string name="thai_cuisine">Thai</string>
 </resources>
