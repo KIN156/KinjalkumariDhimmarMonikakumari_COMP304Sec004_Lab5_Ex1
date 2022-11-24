@@ -16,50 +16,66 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class GoogleMapsAPI {
-    private String cuisine;
+    private String cuisine = "indian";
     private Request apiRequest;
     private OkHttpClient client;
+    private String PAGE_TOKEN = "";
+    private String mapsKey = "&key="+Constants.MAPS_API_KEY;
+    private String cuisineKeywordUrlBit = "&keyword=";
+    private String continuationTokenUrlBit = "&pageToken=";
+    private String apiRequestUrl = Constants.BASE_URl +
+            "location="+ Constants.TORONTO_LAT+ "%2C"+ Constants.TORONTO_LON +
+            "&radius="+ Constants.RADIUS +
+            "&type=restaurant";
 
     public GoogleMapsAPI(String cuisine){
         this.cuisine = cuisine.toLowerCase();
         client = new OkHttpClient().newBuilder().build();
-        apiRequest = new Request.Builder()
-                .url(Constants.BASE_URl +
-                        "location="+ Constants.TORONTO_LAT+ "%2C"+ Constants.TORONTO_LON +"&"+
-                        "radius="+ Constants.RADIUS + "&" +
-                        "type=restaurant&" +
-                        "keyword="+ cuisine +"&" +
-                        "key="+Constants.MAPS_API_KEY)
-                .method("GET", null)
-                .build();
+    }
+
+    public ArrayList<Restaurant> getMoreRestaurantsForCuisine() {
+        ArrayList<Restaurant> restaurants = new ArrayList<>();
+        if(!PAGE_TOKEN.equals("")){
+            String pageToken = continuationTokenUrlBit + PAGE_TOKEN;
+            String cuisineType = cuisineKeywordUrlBit + cuisine;
+            apiRequest = new Request.Builder()
+                    .url(apiRequestUrl+
+                            cuisineType +
+                            mapsKey +
+                            pageToken
+                            )
+                    .method("GET", null)
+                    .build();
+            try {
+                Response response = client.newCall(apiRequest).execute();
+                if(response.body() != null && response.isSuccessful()) {
+                    ResponseBody responseBody = response.body();
+                    restaurants = getRestaurantsFromResponseBody(responseBody);
+                    return restaurants;
+                }
+                return null;
+            }catch (IOException ioException) {
+                return null;
+            }
+        }
+        return null;
     }
 
     public ArrayList<Restaurant> getRestaurantsForCuisine() {
         ArrayList<Restaurant> restaurants = new ArrayList<>();
+        String cuisineType = cuisineKeywordUrlBit + cuisine;
+        apiRequest = new Request.Builder()
+                .url(apiRequestUrl+
+                        cuisineType +
+                        mapsKey)
+                .method("GET", null)
+                .build();
         try {
             Response response = client.newCall(apiRequest).execute();
             if(response.body() != null && response.isSuccessful()) {
                 ResponseBody responseBody = response.body();
-                try {
-                    JSONObject jsonObject = new JSONObject(responseBody.string());
-                    String status = (String) jsonObject.get("status");
-                    if(status.equals("OK")) {
-                        JSONArray resultArray = (JSONArray) jsonObject.get("results");
-                        int index;
-                        for(index = 0; index < resultArray.length(); index++) {
-                            JSONObject resultObject = (JSONObject) resultArray.get(index);
-                            Restaurant restaurant = parseJSONObjectToRestaurant(resultObject);
-                            if(restaurant != null) {
-                                restaurants.add(restaurant);
-                            }
-                        }
-                        return restaurants;
-                    }else{
-                        return null;
-                    }
-                }catch (JSONException jsonException) {
-                    return null;
-                }
+                restaurants = getRestaurantsFromResponseBody(responseBody);
+                return restaurants;
             }
             return null;
         }catch (IOException ioException) {
@@ -67,6 +83,38 @@ public class GoogleMapsAPI {
         }
     }
 
+    private ArrayList<Restaurant> getRestaurantsFromResponseBody(ResponseBody responseBody) {
+        ArrayList<Restaurant> restaurants = new ArrayList<>();
+        try {
+            JSONObject jsonObject = new JSONObject(responseBody.string());
+            String status = (String) jsonObject.get("status");
+            if(status.equals("OK")) {
+                JSONArray resultArray = (JSONArray) jsonObject.get("results");
+                if(jsonObject.has("next_page_token")) {
+                    PAGE_TOKEN = jsonObject.getString("next_page_token");
+                }else{
+                    PAGE_TOKEN = "";
+                }
+                int index;
+                for(index = 0; index < resultArray.length(); index++) {
+                    JSONObject resultObject = (JSONObject) resultArray.get(index);
+                    Restaurant restaurant = parseJSONObjectToRestaurant(resultObject);
+                    if(restaurant != null) {
+                        restaurants.add(restaurant);
+                    }
+                }
+                return restaurants;
+            }else{
+                return null;
+            }
+        }catch (JSONException jsonException) {
+            System.out.println(jsonException.getLocalizedMessage());
+            return null;
+        }catch (IOException ioException) {
+            System.out.println(ioException.getLocalizedMessage());
+            return null;
+        }
+    }
     private Restaurant parseJSONObjectToRestaurant(JSONObject resultObject) {
         Restaurant restaurant = null;
         if(resultObject.has("name") &&
@@ -104,5 +152,9 @@ public class GoogleMapsAPI {
             }
         }
         return restaurant;
+    }
+
+    public String getPAGE_TOKEN() {
+        return this.PAGE_TOKEN;
     }
 }

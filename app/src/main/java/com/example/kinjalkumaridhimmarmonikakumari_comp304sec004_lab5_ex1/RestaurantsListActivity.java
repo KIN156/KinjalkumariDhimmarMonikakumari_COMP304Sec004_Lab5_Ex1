@@ -1,5 +1,6 @@
 package com.example.kinjalkumaridhimmarmonikakumari_comp304sec004_lab5_ex1;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,10 +31,18 @@ public class RestaurantsListActivity extends AppCompatActivity implements OnItem
 
     RestaurantRecyclerViewAdapter restaurantRecyclerViewAdapter;
 
-    String cuisineTitle;
+    private String cuisineTitle;
+
+    private int lastVisibleItem = 0;
+    private int visibleThreshold = 5;
+
+    GoogleMapsAPI googleMapsAPI;
+
+    boolean isFetchInProgress = false;
 
     //Data
     ArrayList<Restaurant> allRestaurants;
+    LinearLayoutManager linearLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +76,35 @@ public class RestaurantsListActivity extends AppCompatActivity implements OnItem
         return title;
     }
 
+    private class GetMoreRestaurantsForCuisine extends AsyncTask<Void, Void, ArrayList<Restaurant>> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressCard.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected ArrayList<Restaurant> doInBackground(Void... voids) {
+            if(googleMapsAPI != null) {
+                return googleMapsAPI.getMoreRestaurantsForCuisine();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Restaurant> restaurants) {
+            super.onPostExecute(restaurants);
+            isFetchInProgress = false;
+            progressCard.setVisibility(View.GONE);
+            if(restaurants != null) {
+                int lastItemIndexBeforeAdding = allRestaurants.size()-1;
+                allRestaurants.addAll(restaurants);
+                restaurantRecyclerViewAdapter
+                        .notifyItemRangeInserted(lastItemIndexBeforeAdding, restaurants.size());
+            }
+        }
+    }
+
     //Async Tasks
     private class GetRestaurantsForCuisine extends AsyncTask<Void, Void, ArrayList<Restaurant>> {
 
@@ -78,7 +116,7 @@ public class RestaurantsListActivity extends AppCompatActivity implements OnItem
 
         @Override
         protected ArrayList<Restaurant> doInBackground(Void... voids) {
-            GoogleMapsAPI googleMapsAPI = new GoogleMapsAPI(cuisineTitle);
+            googleMapsAPI = new GoogleMapsAPI(cuisineTitle);
             return googleMapsAPI.getRestaurantsForCuisine();
         }
 
@@ -91,9 +129,32 @@ public class RestaurantsListActivity extends AppCompatActivity implements OnItem
                 restaurantRecyclerViewAdapter = new RestaurantRecyclerViewAdapter(
                         RestaurantsListActivity.this,
                         RestaurantsListActivity.this, allRestaurants);
-                restaurantRecyclerView.setLayoutManager(
-                        new LinearLayoutManager(RestaurantsListActivity.this));
+                linearLayoutManager = new LinearLayoutManager(RestaurantsListActivity.this);
+                restaurantRecyclerView.setLayoutManager(linearLayoutManager);
                 restaurantRecyclerView.setAdapter(restaurantRecyclerViewAdapter);
+                restaurantRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                        super.onScrollStateChanged(recyclerView, newState);
+                    }
+
+                    @Override
+                    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                        super.onScrolled(recyclerView, dx, dy);
+                        int totalItemCount = linearLayoutManager.getItemCount();
+                        lastVisibleItem = linearLayoutManager
+                                .findLastVisibleItemPosition();
+                        if (totalItemCount <= (lastVisibleItem + visibleThreshold)) {
+                            // End has been reached
+                            // Do something
+                            if(!isFetchInProgress && googleMapsAPI != null
+                                    && !googleMapsAPI.getPAGE_TOKEN().equals("")){
+                                isFetchInProgress = true;
+                                new GetMoreRestaurantsForCuisine().execute();
+                            }
+                        }
+                    }
+                });
 
             }else{
                 Toast.makeText(RestaurantsListActivity.this,
