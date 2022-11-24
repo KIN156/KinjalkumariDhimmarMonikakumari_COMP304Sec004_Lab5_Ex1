@@ -25,7 +25,7 @@ public class CuisineRecyclerViewAdapter extends RecyclerView.Adapter<CuisineRecy
     public CuisineRecyclerViewAdapter(Context context, OnItemClickListener itemClickListener,
                                       ArrayList<Cuisine> cuisines){
         this.context = context;
-        this.itemClickListener = itemClickListener;
+        CuisineRecyclerViewAdapter.itemClickListener = itemClickListener;
         this.cuisines = cuisines;
     }
 

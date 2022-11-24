@@ -12,5 +12,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="30dp"
-        tools:listitem="@layout/recycler_view_item"></androidx.recyclerview.widget.RecyclerView>
+        tools:listitem="@layout/cusisine_layout_item">
+    </androidx.recyclerview.widget.RecyclerView>
 </LinearLayout>

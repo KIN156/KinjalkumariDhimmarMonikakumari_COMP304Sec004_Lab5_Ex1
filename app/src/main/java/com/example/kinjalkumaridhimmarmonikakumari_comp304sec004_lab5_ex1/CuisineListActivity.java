@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -60,5 +61,10 @@ public class CuisineListActivity extends AppCompatActivity implements OnItemClic
     @Override
     public void onItemClick(View view, int position) {
         //Executes when cuisine item is clicked
+        Intent intent = new Intent(CuisineListActivity.this,
+                RestaurantsListActivity.class);
+        Cuisine cuisine = allCuisines.get(position);
+        intent.putExtra("cuisine_title", cuisine.getCuisineName());
+        startActivity(intent);
     }
 }
