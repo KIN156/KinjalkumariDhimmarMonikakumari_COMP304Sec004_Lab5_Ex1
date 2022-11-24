@@ -8,4 +8,10 @@
     <string name="boba_cuisine">Boba</string>
     <string name="mexican_cuisine">Mexican</string>
     <string name="thai_cuisine">Thai</string>
+    <string name="restaurant_name">Name: </string>
+    <string name="restaurant_rating">Ratings: </string>
+    <string name="restaurant_total_ratings">Total\nRatings: </string>
+    <string name="restaurant_address">Address: </string>
+    <string name="open_now">Open Now:</string>
+    <string name="title_activity_restaurant_map_location">RestaurantMapLocationActivity</string>
 </resources>
