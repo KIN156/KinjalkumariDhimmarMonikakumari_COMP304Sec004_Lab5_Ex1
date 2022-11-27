@@ -24,7 +24,7 @@ public class GoogleMapsAPI {
     private String cuisineKeywordUrlBit = "&keyword=";
     private String continuationTokenUrlBit = "&pageToken=";
     private String apiRequestUrl = Constants.BASE_URl +
-            "location="+ Constants.TORONTO_LAT+ "%2C"+ Constants.TORONTO_LON +
+            "location="+ Constants.TORONTO_LAT + "%2C"+ Constants.TORONTO_LON +
             "&radius="+ Constants.RADIUS +
             "&type=restaurant";
 
