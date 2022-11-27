@@ -22,9 +22,9 @@ public class GoogleMapsAPI {
     private String PAGE_TOKEN = "";
     private String mapsKey = "&key="+Constants.MAPS_API_KEY;
     private String cuisineKeywordUrlBit = "&keyword=";
-    private String continuationTokenUrlBit = "&pageToken=";
+    private String continuationTokenUrlBit = "&pagetoken=";
     private String apiRequestUrl = Constants.BASE_URl +
-            "location="+ Constants.TORONTO_LAT+ "%2C"+ Constants.TORONTO_LON +
+            "location="+ Constants.TORONTO_LAT + "%2C"+ Constants.TORONTO_LON +
             "&radius="+ Constants.RADIUS +
             "&type=restaurant";
 

@@ -21,6 +21,7 @@ public class RestaurantMapLocationActivity extends FragmentActivity implements O
     private double longitude;
     private double latitude;
     private String restName;
+    private int mapType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +31,7 @@ public class RestaurantMapLocationActivity extends FragmentActivity implements O
         setContentView(binding.getRoot());
 
         //Get lat and long from intent
-        getLocationValuesFromIntent();
+        getValuesFromIntent();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -48,20 +49,26 @@ public class RestaurantMapLocationActivity extends FragmentActivity implements O
         mMap.addMarker(new MarkerOptions().position(torontoRestaurantLocation).title(this.restName));
         mMap.animateCamera(CameraUpdateFactory
                 .newLatLngZoom(torontoRestaurantLocation, 20.0f));
+        mMap.setMapType(mapType);
+        mMap.getUiSettings().setMapToolbarEnabled(true);
+        mMap.getUiSettings().setCompassEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
     }
 
-    private void getLocationValuesFromIntent() {
+    private void getValuesFromIntent() {
         Intent intent = getIntent();
         if(intent.hasExtra("restaurant_lat") &&
                 intent.hasExtra("restaurant_lng") &&
-                intent.hasExtra("restaurant_name")
+                intent.hasExtra("restaurant_name") &&
+                intent.hasExtra("map_type")
         ) {
             this.latitude = intent.getDoubleExtra("restaurant_lat",
                     Double.parseDouble(Constants.TORONTO_LAT));
             this.longitude = intent.getDoubleExtra("restaurant_lng",
                     Double.parseDouble(Constants.TORONTO_LON));
             this.restName = intent.getStringExtra("restaurant_name");
+            this.mapType = intent.getIntExtra("map_type", GoogleMap.MAP_TYPE_NORMAL);
         }
     }
 }
